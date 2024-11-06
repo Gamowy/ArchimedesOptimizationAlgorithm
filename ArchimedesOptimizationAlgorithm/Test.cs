@@ -19,7 +19,7 @@
 
             /* Parametry zewnętrzne:
              * N - wielkość populacji
-             * i - ilość iteracji
+             * I - ilość iteracji
              * Dim - wymiar dziedziny funkcji testowej
              * Fun - funkcja testowa
              * Lb - dolne ograniczenie dziedziny funkcji testowej
