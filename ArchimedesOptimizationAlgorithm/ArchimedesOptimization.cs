@@ -135,10 +135,7 @@
             while (t <= I)
             {
                 double TF = Math.Exp((Double)(t - I) / I);
-                if (TF > 1)
-                {
-                    TF = 1;
-                }
+                TF = (TF > 1.0) ? 1.0 : TF;
                 double d = Math.Exp((Double)(I - t) / I) - (Double)(t / I);
                 
                 foreach (ImmersedObject obj in ObjectPopulation)
