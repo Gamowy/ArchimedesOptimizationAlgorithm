@@ -178,6 +178,7 @@
                     // update object if new values are better
                     xNew = checkBounds(xNew);
                     double FValueNew = Fun(xNew);
+                    NumberOfEvaluationFitnessFunction++;
                     if (FValueNew < obj.FValue)
                     {
                         obj.x = xNew;
