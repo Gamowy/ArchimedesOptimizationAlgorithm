@@ -1,4 +1,19 @@
-﻿namespace ArchimedesOptimizationAlgorithm
+﻿/* Archimedes Optimization Algorithm
+ * Parametry zewnętrzne:
+ * N - wielkość populacji
+ * I - ilość iteracji
+ * Dim - wymiar dziedziny funkcji testowej
+ * Fun - funkcja testowa
+ * Lb - tablica dolnych ograniczeń dziedziny funkcji testowej (jeżeli ograniczenie jest takie same dla każdej zmiennej to wystarczy podać jedno)
+ * Ub - tablica górnych ograniczeń dziedziny funkcji testowej (jeżeli ograniczenie jest takie same dla każdej zmiennej to wystarczy podać jedno)
+ * 
+ * Domyślne wartości parametrów wewnętrznych:
+ * C1 = 2.0
+ * C2 = 6.0
+ * C3 = 2.0
+ * C4 = 0.5
+ */
+namespace ArchimedesOptimizationAlgorithm
 {
     public class ImmersedObject
     {
@@ -7,7 +22,7 @@
         public double[] den;
         public double[] vol;
         public double[] acc;
-        public ImmersedObject(int dim, double lb, double ub)
+        public ImmersedObject(int dim, double[] lb, double[] ub)
         {
             Random rand = new Random();
             x = new double[dim];
@@ -16,10 +31,10 @@
             acc = new double[dim];
             for (int i = 0; i < dim; i++)
             {
-                x[i] = lb + rand.NextDouble() * (ub - lb);
+                x[i] = lb[i] + rand.NextDouble() * (ub[i] - lb[i]);
                 den[i] = rand.NextDouble();
                 vol[i] = rand.NextDouble();
-                acc[i] = lb + rand.NextDouble() * (ub - lb);
+                acc[i] = lb[i] + rand.NextDouble() * (ub[i] - lb[i]);
             }
         }
     }
@@ -34,27 +49,44 @@
         int Dim;
         // fitness function
         Func<double[], double> Fun;
-        // lower and upper bounds of fitness function
-        double Lb, Ub;
+        // lower and upper bounds of fitness function for each dimension
+        double[] Lb, Ub;
         // population of objects
         ImmersedObject[] ObjectPopulation;
         // best object
         ImmersedObject BestObject;
 
-        public ArchimedesOptimization(int N, int I, int Dim, Func<double[], double> Fun, double Lb, double Ub)
+        public ArchimedesOptimization(int N, int I, int Dim, Func<double[], double> Fun, double[] Lb, double[] Ub)
         {
             this.N = N;
             this.I = I;
             this.Dim = Dim;
             this.Fun = Fun;
-            this.Lb = Lb;
-            this.Ub = Ub;
+
+            if (Lb.Length == 1)
+            {
+                this.Lb = new double[Dim];
+                Array.Fill(this.Lb, Lb[0]);
+            }
+            else
+            {
+                this.Lb = Lb;
+            }
+            if (Ub.Length == 1)
+            {
+                this.Ub = new double[Dim];
+                Array.Fill(this.Ub, Ub[0]);
+            }
+            else
+            {
+                this.Ub = Ub;
+            }
 
             // initalize new population with random values
             ObjectPopulation = new ImmersedObject[N];
             for (int j = 0; j < N; j++)
             {
-                ObjectPopulation[j] = new ImmersedObject(Dim, Lb, Ub);
+                ObjectPopulation[j] = new ImmersedObject(Dim, this.Lb, this.Ub);
                 ObjectPopulation[j].FValue = Fun(ObjectPopulation[j].x);
             }
             BestObject = ObjectPopulation[0];
@@ -81,13 +113,13 @@
         {
             for (int i = 0; i < x.Length; i++)
             {
-                if (x[i] < Lb)
+                if (x[i] < Lb[i])
                 {
-                    x[i] = Lb;
+                    x[i] = Lb[i];
                 }
-                else if (x[i] > Ub)
+                else if (x[i] > Ub[i])
                 {
-                    x[i] = Ub;
+                    x[i] = Ub[i];
                 }
             }
             return x;
@@ -137,7 +169,7 @@
                 double TF = Math.Exp((Double)(t - I) / I);
                 TF = (TF > 1.0) ? 1.0 : TF;
                 double d = Math.Exp((Double)(I - t) / I) - (Double)(t / I);
-                
+
                 foreach (ImmersedObject obj in ObjectPopulation)
                 {
                     for (int i = 0; i < Dim; i++)
@@ -156,8 +188,8 @@
                         {
                             obj.acc[i] = (mr.den[i] + mr.vol[i] * mr.acc[i]) / (obj.den[i] * obj.vol[i]);
                             obj.acc[i] = NormalizeAcceleration(i, obj.acc[i]);
-                            xNew[i] = obj.x[i] + C1 * rand.NextDouble() * obj.acc[i] * d * (xRand[i] - obj.x[i]);    
-                        } 
+                            xNew[i] = obj.x[i] + C1 * rand.NextDouble() * obj.acc[i] * d * (xRand[i] - obj.x[i]);
+                        }
                     }
                     // exploitation phase
                     else
